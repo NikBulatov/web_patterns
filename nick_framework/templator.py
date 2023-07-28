@@ -14,7 +14,7 @@ def render(
     :param kwargs: arguments for template
     :return:
     """
-    with open(path.join(folder, template_name), "r", encoding="utf-8") as f:
+    with open(path.join(path.abspath(folder), template_name), "r", encoding="utf-8") as f:
         template = Template(f.read())
     return template.render(**kwargs)
 
