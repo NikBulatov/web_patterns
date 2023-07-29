@@ -3,7 +3,7 @@ import views
 import middlewares
 
 
-class Application:
+class Framework:
     def __init__(
         self, routes: dict, fronts: Iterable[callable] = middlewares.middlewares
     ):
