@@ -10,7 +10,8 @@ class Framework:
         self.routes = routes
         self.fronts = fronts
 
-    def _parse_get_data(self, data: str) -> dict:
+    @staticmethod
+    def _parse_get_data(data: str) -> dict:
         """
         Parsing query params by GET request
         :param data:
@@ -25,7 +26,7 @@ class Framework:
         return result
 
     @staticmethod
-    def __get_post_data(env: dict) -> bytes:
+    def __extract_post_data(env: dict) -> bytes:
         """
         Extract data from post request body
         :param env:
@@ -48,7 +49,8 @@ class Framework:
             result = self._parse_get_data(data_str)
         return result
 
-    def _add_backslash(self, path: str) -> str:
+    @staticmethod
+    def _add_backslash(path: str) -> str:
         """
         Checks for backslash at the end of a path.
         In case of its absence, adds it to the end and returns
@@ -85,7 +87,7 @@ class Framework:
             data = self._parse_get_data(query_string)
             request.update(data)
         elif method == "POST":
-            data = self._parse_post_data(self.__get_post_data(environ))
+            data = self._parse_post_data(self.__extract_post_data(environ))
             request.update(data)
 
         self.show_message(request)
