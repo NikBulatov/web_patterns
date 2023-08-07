@@ -1,5 +1,5 @@
 from os import path
-from jinja2 import Template
+from jinja2 import FileSystemLoader, environment
 from config import DEV_CONFIG
 
 
@@ -14,11 +14,12 @@ def render(
     :param kwargs: arguments for template
     :return:
     """
-    with open(path.join(path.abspath(folder), template_name), "r", encoding="utf-8") as f:
-        template = Template(f.read())
+    env = environment.Environment()
+    env.loader = FileSystemLoader(path.abspath(folder))
+    template = env.get_template(template_name)
     return template.render(**kwargs)
 
 
 if __name__ == "__main__":
-    output_test = render("index.html", object_list=[{"name": "Leo"}, {"name": "Kate"}])
+    output_test = render("index.html.jinja", object_list=[{"name": "Leo"}, {"name": "Kate"}])
     print(output_test)
