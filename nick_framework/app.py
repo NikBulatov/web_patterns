@@ -1,53 +1,26 @@
+from base64 import decodestring
 from typing import Iterable
 import views
 import middlewares
+from requests import GetRequests, PostRequests
 
 
 class Framework:
     def __init__(
-        self, routes: dict, fronts: Iterable[callable] = middlewares.middlewares
+            self, routes: dict,
+            fronts: Iterable[callable] = middlewares.middlewares
     ):
         self.routes = routes
         self.fronts = fronts
 
     @staticmethod
-    def _parse_get_data(data: str) -> dict:
-        """
-        Parsing query params by GET request
-        :param data:
-        :return:
-        """
-        result = {}
-        if data:
-            params = data.split("&")
-            for param in params:
-                key, value = param.split("=")
-                result[key] = value
-        return result
-
-    @staticmethod
-    def __extract_post_data(env: dict) -> bytes:
-        """
-        Extract data from post request body
-        :param env:
-        :return:
-        """
-        content_length_data = env.get("CONTENT_LENGTH")
-        content_length = int(content_length_data) if content_length_data else 0
-        data = env["wsgi.input"].read(content_length) if content_length > 0 else b""
-        return data
-
-    def _parse_post_data(self, data: bytes) -> dict:
-        """
-        Parse bytes from post request body
-        :param data:
-        :return:
-        """
-        result = {}
-        if data:
-            data_str = data.decode(encoding="utf-8")
-            result = self._parse_get_data(data_str)
-        return result
+    def _decode_value(data: dict) -> dict:
+        new_data = {}
+        for k, v in data.items():
+            val = bytes(v.replace('%', '=').replace("+", " "), 'UTF-8')
+            val_decode_str = decodestring(val).decode('UTF-8')
+            new_data[k] = val_decode_str
+        return new_data
 
     @staticmethod
     def _add_backslash(path: str) -> str:
@@ -80,22 +53,21 @@ class Framework:
 
         request = {}
         path = self._add_backslash(environ["PATH_INFO"])
-        query_string = environ["QUERY_STRING"]
         method = environ["REQUEST_METHOD"]
 
         if method == "GET":
-            data = self._parse_get_data(query_string)
-            request.update(data)
+            data = PostRequests().get_request_params(environ)
+            request["data"] = self._decode_value(data)
         elif method == "POST":
-            data = self._parse_post_data(self.__extract_post_data(environ))
-            request.update(data)
+            request_params = GetRequests().get_request_params(environ)
+            request['request_params'] = self._decode_value(request_params)
 
         self.show_message(request)
 
         if path in self.routes:
             view = self.routes[path]
         else:
-            view = views.not_found_404_view
+            view = views.NotFoundView()
 
         for middleware in self.fronts:
             middleware(request)

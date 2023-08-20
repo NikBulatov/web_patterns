@@ -1,8 +1,11 @@
 import views
 
 routes = {
-    "/": views.index_view,
-    "/another/": views.another_view,
-    "/contact/": views.contact_view,
-    "/examples/": views.examples_view,
+    "/": views.IndexView(),
+    "/about/": views.AboutView(),
+    "/courses-list/": views.CoursesListView(),
+    "/create-course/": views.CreateCourseView(),
+    "/create-category/": views.CreateCategoryView(),
+    "/category-list/": views.CategoryListView(),
+    "/copy-course/": views.CopyCourseView(),
 }
