@@ -13,14 +13,14 @@ class Engine:
         self.categories: list = []
 
     @staticmethod
-    def create_user(type_):
+    def create_user(type_: str):
         return UserFactory.create(type_)
 
     @staticmethod
-    def create_category(name, category=None):
+    def create_category(name: str, category=None):
         return Category(name, category)
 
-    def find_category_by_id(self, id_):
+    def find_category_by_id(self, id_: int):
         for item in self.categories:
             print("item", item.id)
             if item.id == id_:
@@ -28,7 +28,7 @@ class Engine:
         raise Exception(f"NO category with ID {id_}")
 
     @staticmethod
-    def create_course(type_, name, category):
+    def create_course(type_, name: str, category: Category):
         return CourseFactory.create(type_, name, category)
 
     def get_course(self, name):
