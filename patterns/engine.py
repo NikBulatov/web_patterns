@@ -1,10 +1,10 @@
-from base64 import decodestring
+from base64 import decodebytes
 
 from patterns.models import Model
 from patterns.simples import Technique, Level
-from users import UserFactory, User, Student, Teacher, Staff
-from categories import Category
-from courses import CourseFactory, CoursePrototype
+from patterns.users import UserFactory, User, Student, Teacher, Staff
+from patterns.categories import Category
+from patterns.courses import CourseFactory, CoursePrototype
 
 
 class Engine:
@@ -60,7 +60,7 @@ class Engine:
     @staticmethod
     def decode_value(value: str) -> str:
         val_b = bytes(value.replace("%", "=").replace("+", " "), "UTF-8")
-        val_decode_str = decodestring(val_b)
+        val_decode_str = decodebytes(val_b)
         return val_decode_str.decode("UTF-8")
 
 

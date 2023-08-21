@@ -1,8 +1,9 @@
-from base64 import decodestring
+from base64 import decodebytes
 from typing import Iterable
+
 import views
 import middlewares
-from requests import GetRequest, PostRequest
+from nick_framework.requests import GetRequest, PostRequest
 
 
 class Framework:
@@ -17,7 +18,7 @@ class Framework:
         new_data = {}
         for key, value in data.items():
             data = bytes(value.replace("%", "=").replace("+", " "), "UTF-8")
-            decode_data_str = decodestring(data).decode("UTF-8")
+            decode_data_str = decodebytes(data).decode("UTF-8")
             new_data[key] = decode_data_str
         return new_data
 

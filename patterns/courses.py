@@ -1,6 +1,6 @@
 # Origami courses
 from copy import deepcopy
-from categories import Category
+from patterns.categories import Category
 from patterns.models import Model
 
 

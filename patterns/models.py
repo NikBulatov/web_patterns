@@ -1,5 +1,5 @@
 # Origami models
-from simples import Technique, Level
+from patterns.simples import Technique, Level
 
 
 class Model:
