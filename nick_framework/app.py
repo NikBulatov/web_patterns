@@ -2,13 +2,12 @@ from base64 import decodestring
 from typing import Iterable
 import views
 import middlewares
-from requests import GetRequests, PostRequests
+from requests import GetRequest, PostRequest
 
 
 class Framework:
     def __init__(
-            self, routes: dict,
-            fronts: Iterable[callable] = middlewares.middlewares
+        self, routes: dict, fronts: Iterable[callable] = middlewares.middlewares
     ):
         self.routes = routes
         self.fronts = fronts
@@ -16,10 +15,10 @@ class Framework:
     @staticmethod
     def _decode_value(data: dict) -> dict:
         new_data = {}
-        for k, v in data.items():
-            val = bytes(v.replace('%', '=').replace("+", " "), 'UTF-8')
-            val_decode_str = decodestring(val).decode('UTF-8')
-            new_data[k] = val_decode_str
+        for key, value in data.items():
+            data = bytes(value.replace("%", "=").replace("+", " "), "UTF-8")
+            decode_data_str = decodestring(data).decode("UTF-8")
+            new_data[key] = decode_data_str
         return new_data
 
     @staticmethod
@@ -41,9 +40,7 @@ class Framework:
             name = data.get("name")
             email = data.get("email")
             message = data.get("message")
-            print(
-                f"Sender's name: {name} Sender E-mail: {email} Message: {message}"
-            )
+            print(f"Sender's name: {name} Sender E-mail: {email} Message: {message}")
 
     def __call__(self, environ: dict, start_response: callable):
         """
@@ -56,11 +53,11 @@ class Framework:
         method = environ["REQUEST_METHOD"]
 
         if method == "GET":
-            data = PostRequests().get_request_params(environ)
+            data = PostRequest().get_params(environ)
             request["data"] = self._decode_value(data)
         elif method == "POST":
-            request_params = GetRequests().get_request_params(environ)
-            request['request_params'] = self._decode_value(request_params)
+            query_params = GetRequest().get_params(environ)
+            request["request_params"] = self._decode_value(query_params)
 
         self.show_message(request)
 

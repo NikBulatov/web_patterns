@@ -1,17 +1,14 @@
 # Origami models
-from patterns.price import Price
-from simples import Technique
+from simples import Technique, Level
 
 
 class Model:
     def __init__(
         self,
-        price: Price,
-        instruction: str,
-        level,
-        technique: Technique = Technique.SIMPLE
+        name: str,
+        level: Level = Level.JUNIOR,
+        technique: Technique = Technique.TRADITIONAL
     ):
-        self.price = price
-        self.instruction = instruction
+        self.name = name
         self.level = level
         self.technique = technique

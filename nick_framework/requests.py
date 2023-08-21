@@ -1,6 +1,6 @@
 def parse_input_data(data: str) -> dict:
     """
-    Parsing query params by GET request
+    Parsing query params
     :param data:
     :return:
     """
@@ -8,23 +8,22 @@ def parse_input_data(data: str) -> dict:
     if data:
         params = data.split("&")
         for item in params:
-            k, v = item.split('=')
+            k, v = item.split("=")
             result[k] = v
     return result
 
 
-class GetRequests:
+class GetRequest:
     @staticmethod
-    def get_request_params(environ: dict) -> dict:
-        query_string = environ['QUERY_STRING']
+    def get_params(environ: dict) -> dict:
+        query_string = environ["QUERY_STRING"]
         request_params = parse_input_data(query_string)
         return request_params
 
 
-class PostRequests:
-
+class PostRequest:
     @staticmethod
-    def get_wsgi_input_data(environ: dict) -> bytes:
+    def _get_wsgi_input_data(environ: dict) -> bytes:
         """
         Extract data from post request body
         :param environ:
@@ -32,19 +31,18 @@ class PostRequests:
         """
         content_length_data = environ.get("CONTENT_LENGTH")
         content_length = int(content_length_data) if content_length_data else 0
-        data = environ["wsgi.input"].read(
-            content_length) if content_length > 0 else b""
+        data = environ["wsgi.input"].read(content_length) if content_length > 0 else b""
         return data
 
     @staticmethod
-    def parse_wsgi_input_data(self, data: bytes) -> dict:
+    def _parse_wsgi_input_data(data: bytes) -> dict:
         result = {}
         if data:
-            data_str = data.decode(encoding='utf-8')
+            data_str = data.decode(encoding="utf-8")
             result = parse_input_data(data_str)
         return result
 
-    def get_request_params(self, environ: dict) -> dict:
-        data = self.get_wsgi_input_data(environ)
-        data = self.parse_wsgi_input_data(data)
+    def get_params(self, environ: dict) -> dict:
+        data = self._get_wsgi_input_data(environ)
+        data = self._parse_wsgi_input_data(data)
         return data

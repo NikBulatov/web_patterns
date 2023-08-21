@@ -6,12 +6,12 @@ engine = Engine()
 
 class IndexView:
     def __call__(self, request: dict) -> tuple[str, str]:
-        return "200 OK", render("index.html.jinja.jinja")
+        return "200 OK", render("index.html.jinja")
 
 
 class CoursesListView:
     def __call__(self, request: dict) -> tuple[str, str]:
-        return "200 OK", render("examples.html.jinja.jinja")
+        return "200 OK", render("course/list.html.jinja")
 
 
 class CreateCourseView:
@@ -23,16 +23,16 @@ class CreateCourseView:
 
             name = data["name"]
             name = engine.decode_value(name)
-
             category = None
+
             if self.category_id != -1:
                 category = engine.find_category_by_id(int(self.category_id))
-
-                course = engine.create_course("record", name, category)
+                models = [engine.create_model(f"Something #{i}") for i in range(4)]
+                course = engine.create_course("record", name, category, models)
                 engine.courses.append(course)
 
             return "200 OK", render(
-                "contact.html.jinja",
+                "course/create.html.jinja",
                 objects_list=category.courses,
                 name=category.name,
                 id=category.id,
@@ -44,7 +44,7 @@ class CreateCourseView:
                 category = engine.find_category_by_id(int(self.category_id))
 
                 return "200 OK", render(
-                    "contact.html.jinja", name=category.name, id=category.id
+                    "course/create.html.jinja", name=category.name, id=category.id
                 )
             except KeyError:
                 return "200 OK", "No categories have been added yet"
@@ -57,7 +57,7 @@ class AboutView:
 
 class CategoryListView:
     def __call__(self, request: dict) -> tuple[str, str]:
-        return "200 OK", render("examples.html.jinja")
+        return "200 OK", render("category/list.html.jinja")
 
 
 class CreateCategoryView:
@@ -77,10 +77,12 @@ class CreateCategoryView:
             new_category = engine.create_category(name, category)
             engine.categories.append(new_category)
 
-            return "200 OK", render("index.html.jinja", objects_list=engine.categories)
+            return "200 OK", render(
+                "category/create.html.jinja", objects_list=engine.categories
+            )
         else:
             categories = engine.categories
-            return "200 OK", render("contact.html.jinja", categories=categories)
+            return "200 OK", render("category/create.html.jinja", categories=categories)
 
 
 class CopyCourseView:
@@ -89,7 +91,6 @@ class CopyCourseView:
 
         try:
             name = request_params["name"]
-
             old_course = engine.get_course(name)
             if old_course:
                 new_name = f"copy_{name}"
@@ -98,7 +99,7 @@ class CopyCourseView:
                 engine.courses.append(new_course)
 
             return "200 OK", render(
-                "examples.html.jinja",
+                "course/create.html.jinja",
                 objects_list=engine.courses,
                 name=new_course.category.name,
             )
