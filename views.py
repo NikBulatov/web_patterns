@@ -52,7 +52,7 @@ class CreateCourseView:
 
 class AboutView:
     def __call__(self, request: dict) -> tuple[str, str]:
-        return "200 OK", render("examples.html.jinja")
+        return "200 OK", render("about.html.jinja")
 
 
 class CategoryListView:
