@@ -1,8 +1,8 @@
 from wsgiref.simple_server import make_server
 from nick_framework.app import Framework
-from urls import routes
+from views import urls
 
-application = Framework(routes)
+application = Framework(urls)
 
 
 if __name__ == "__main__":

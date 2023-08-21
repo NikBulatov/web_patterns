@@ -1,19 +1,24 @@
 from nick_framework.templator import render
 from patterns.engine import Engine
+from patterns.router import Route
 
 engine = Engine()
+urls = {}
 
 
+@Route(urls, "/")
 class IndexView:
     def __call__(self, request: dict) -> tuple[str, str]:
         return "200 OK", render("index.html.jinja")
 
 
+@Route(urls, "/courses/list/")
 class CoursesListView:
     def __call__(self, request: dict) -> tuple[str, str]:
         return "200 OK", render("course/list.html.jinja")
 
 
+@Route(urls, "/courses/create/")
 class CreateCourseView:
     category_id = -1
 
@@ -50,16 +55,19 @@ class CreateCourseView:
                 return "200 OK", "No categories have been added yet"
 
 
+@Route(urls, "/about/")
 class AboutView:
     def __call__(self, request: dict) -> tuple[str, str]:
         return "200 OK", render("about.html.jinja")
 
 
+@Route(urls, "/category/list/")
 class CategoryListView:
     def __call__(self, request: dict) -> tuple[str, str]:
         return "200 OK", render("category/list.html.jinja")
 
 
+@Route(urls, "/category/create/")
 class CreateCategoryView:
     def __call__(self, request):
         if request["method"] == "POST":
@@ -85,6 +93,7 @@ class CreateCategoryView:
             return "200 OK", render("category/create.html.jinja", categories=categories)
 
 
+@Route(urls, "/courses/copy/")
 class CopyCourseView:
     def __call__(self, request):
         request_params = request["request_params"]
