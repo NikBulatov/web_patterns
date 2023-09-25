@@ -1,0 +1,32 @@
+{% extends 'base.html.jinja' %}
+{% block title %}Course List{% endblock title %}
+<body>
+{% block body %}
+    {% block header %}
+        {{ super() }}
+    {% endblock header %}
+    {% block sidebar %}
+        {{ super() }}
+        {% block news %}
+        {% endblock news %}
+    {% endblock sidebar %}
+    {% block content %}
+        <div id="content">
+            <div>
+                <a href="/course/create/?id={{ id }}">Create new course</a>
+                <br>
+                <h1>Course list of category "{{ name }}"</h1>
+                {% for item in objects_list %}
+                    <li>
+                        {{ item.name }} <span><a
+                            href="/course/copy/?name={{ item.name }}">Copy course</a></span>
+                    </li>
+                {% endfor %}
+            </div>
+        </div>
+    {% endblock content %}
+    {% block footer %}
+        {{ super() }}
+    {% endblock footer %}
+{% endblock body %}
+</body>
