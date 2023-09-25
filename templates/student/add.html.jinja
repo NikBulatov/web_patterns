@@ -1,0 +1,38 @@
+{% extends "templates/index.html.jinja" %}
+{% block title %}
+Create a course
+{% endblock %}
+{% block style %}
+	{% include "inc-style.html" %}
+{% endblock %}
+{% block menu %}
+	{% include "inc-menu.html" %}
+{% endblock %}
+{% block body %}
+	<div>
+		<li>
+			<a href="/student/list">Student list</a>
+		</li>
+		<li>
+			<a href="/student/create">Create student</a>
+		</li>
+	</div>
+    <h1>Add student to course</h1>
+    <form method="post">
+        <label>
+            <select size="3" name="course_name">
+                {% for item in courses %}
+                <option value="{{item.name}}">{{item.name}}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label>
+            <select size="3" name="student_name">
+                {% for item in students %}
+                <option value="{{item.name}}">{{item.name}}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <button type="submit">Add</button>
+    </form>
+{% endblock %}

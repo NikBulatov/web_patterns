@@ -1,82 +1,77 @@
-from base64 import decodebytes
-from typing import Iterable
+import quopri
+from requests import GetRequests, PostRequests
 
-import views
-import middlewares
-from nick_framework.requests import GetRequest, PostRequest
+
+class PageNotFound404:
+    def __call__(self, request):
+        return "404 WHAT", "404 PAGE Not Found"
 
 
 class Framework:
-    def __init__(
-        self, routes: dict, fronts: Iterable[callable] = middlewares.middlewares
-    ):
-        self.routes = routes
-        self.fronts = fronts
+    def __init__(self, routes_obj, fronts_obj):
+        self.routes_lst = routes_obj
+        self.fronts_lst = fronts_obj
 
-    @staticmethod
-    def _decode_value(data: dict) -> dict:
-        new_data = {}
-        for key, value in data.items():
-            data = bytes(value.replace("%", "=").replace("+", " "), "UTF-8")
-            decode_data_str = decodebytes(data).decode("UTF-8")
-            new_data[key] = decode_data_str
-        return new_data
-
-    @staticmethod
-    def _add_backslash(path: str) -> str:
-        """
-        Checks for backslash at the end of a path.
-        In case of its absence, adds it to the end and returns
-
-        :param path: endpoint
-        :return:
-        """
-
-        last_symbol = path[-1]
-        return path + "/" if last_symbol != "/" else path
-
-    @staticmethod
-    def show_message(data: dict) -> None:
-        if data:
-            name = data.get("name")
-            email = data.get("email")
-            message = data.get("message")
-            print(f"Sender's name: {name} Sender E-mail: {email} Message: {message}")
-
-    def __call__(self, environ: dict, start_response: callable):
-        """
-        :param environ: data dict by WSGI connector
-        :param start_response: response function by server
-        """
+    def __call__(self, environ, start_response):
+        path = environ["PATH_INFO"]
+        if not path.endswith("/"):
+            path = f"{path}/"
 
         request = {}
-        path = self._add_backslash(environ["PATH_INFO"])
         method = environ["REQUEST_METHOD"]
 
+        request["method"] = method
+
+        if method == "POST":
+            data = PostRequests().get_request_params(environ)
+            request["data"] = Framework.decode_value(data)
+            print(f"Нам пришёл post-запрос: {Framework.decode_value(data)}")
         if method == "GET":
-            data = PostRequest().get_params(environ)
-            request["data"] = self._decode_value(data)
-        elif method == "POST":
-            query_params = GetRequest().get_params(environ)
-            request["request_params"] = self._decode_value(query_params)
+            request_params = GetRequests().get_request_params(environ)
+            request["request_params"] = Framework.decode_value(request_params)
+            print(
+                f"Нам пришли GET-параметры:"
+                f" {Framework.decode_value(request_params)}"
+            )
 
-        self.show_message(request)
-
-        if path in self.routes:
-            view = self.routes[path]
+        if path in self.routes_lst:
+            view = self.routes_lst[path]
         else:
-            view = views.NotFoundView()
+            view = PageNotFound404()
 
-        for middleware in self.fronts:
-            middleware(request)
+        for front in self.fronts_lst:
+            front(request)
 
         code, body = view(request)
-        start_response(
-            code,
-            [
-                ("Content-Type", "text/html; charset=UTF-8"),
-                ("Content-Length", str(len(body))),
-            ],
-        )
-
+        start_response(code, [("Content-Type", "text/html")])
         return [body.encode("utf-8")]
+
+    @staticmethod
+    def decode_value(data):
+        new_data = {}
+        for k, v in data.items():
+            val = bytes(v.replace("%", "=").replace("+", " "), "UTF-8")
+            val_decode_str = quopri.decodestring(val).decode("UTF-8")
+            new_data[k] = val_decode_str
+        return new_data
+
+
+class DebugApplication(Framework):
+    def __init__(self, routes_obj, fronts_obj):
+        self.application = Framework(routes_obj, fronts_obj)
+        super().__init__(routes_obj, fronts_obj)
+
+    def __call__(self, env, start_response):
+        print("DEBUG MODE")
+        print(env)
+        return self.application(env, start_response)
+
+
+class MockApplication(Framework):
+    def __init__(self, routes_obj, fronts_obj):
+        self.application = Framework(routes_obj, fronts_obj)
+        super().__init__(routes_obj, fronts_obj)
+
+    def __call__(self, env, start_response):
+        start_response("200 OK", [("Content-Type", "text/html")])
+        return [b"Hello from Fake"]

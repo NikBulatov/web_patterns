@@ -1,66 +1,53 @@
-from base64 import decodebytes
+from quopri import decodestring
+from time import time
+from jsonpickle import encode, decode
 
-from patterns.models import Model
-from patterns.simples import Technique, Level
-from patterns.users import UserFactory, User, Student, Teacher, Staff
+from patterns.users import UserFactory, Student, User, Teacher
 from patterns.categories import Category
-from patterns.courses import CourseFactory, CoursePrototype
+from patterns.courses import CourseFactory, Course
 
 
 class Engine:
     def __init__(self):
         self.teachers: list[Teacher] = []
         self.students: list[Student] = []
-        self.staff: list[Staff] = []
-        self.courses: list[CoursePrototype] = []
+        self.courses: list[Course] = []
         self.categories: list[Category] = []
-        self.models: list[Model] = []
 
     @staticmethod
-    def create_user(type_: str) -> User:
-        return UserFactory.create(type_)
+    def create_user(type_, name) -> User:
+        return UserFactory.create(type_, name)
 
     @staticmethod
-    def create_category(name: str, category=None) -> Category:
+    def create_category(name, category=None) -> Category:
         return Category(name, category)
 
-    def find_category_by_id(self, id_: int) -> Category:
+    def find_category_by_id(self, id: int) -> Category:
         for item in self.categories:
             print("item", item.id)
-            if item.id == id_:
+            if item.id == id:
                 return item
-        raise Exception(f"NO category with ID {id_}")
+        raise Exception(f"No category with id = {id}")
 
     @staticmethod
-    def create_course(
-        type_, name: str, category: Category, models: list[Model]
-    ) -> CoursePrototype:
-        return CourseFactory.create(type_, name, category, models)
+    def create_course(type_, name, category) -> Course:
+        return CourseFactory.create(type_, name, category)
 
-    @staticmethod
-    def create_model(
-        name: str,
-        level: Level = Level.JUNIOR,
-        technique: Technique = Technique.TRADITIONAL,
-    ) -> Model:
-        return Model(name, level, technique)
-
-    def get_model(self, name: str) -> Model | None:
-        for model in self.models:
-            if model.name == name:
-                return model
+    def get_course(self, name) -> Course | None:
+        for item in self.courses:
+            if item.name == name:
+                return item
         return None
 
-    def get_course(self, name: str) -> CoursePrototype | None:
-        for course in self.courses:
-            if course.name == name:
-                return course
-        return None
+    def get_student(self, name) -> Student:
+        for item in self.students:
+            if item.name == name:
+                return item
 
     @staticmethod
-    def decode_value(value: str) -> str:
+    def decode_value(value) -> str:
         val_b = bytes(value.replace("%", "=").replace("+", " "), "UTF-8")
-        val_decode_str = decodebytes(val_b)
+        val_decode_str = decodestring(val_b)
         return val_decode_str.decode("UTF-8")
 
 
@@ -89,3 +76,83 @@ class Logger(metaclass=SingletonLogger):
     @staticmethod
     def log(text: str) -> None:
         print("LOG --->", text)
+
+
+class Debug:
+    def __init__(self, name):
+        self.name = name
+
+    def __call__(self, cls):
+        def timeit(method):
+            def timed(*args, **kw):
+                ts = time()
+                result = method(*args, **kw)
+                te = time()
+                delta = te - ts
+
+                print(f"debug --> {self.name} executed {delta:2.2f} ms")
+                return result
+
+            return timed
+
+        return timeit(cls)
+
+
+class Route:
+    def __init__(self, routes, path):
+        self.routes = routes
+        self.url = path
+
+    def __call__(self, view):
+        self.routes[self.url] = view()
+
+
+class Observer:
+    def update(self, subject):
+        pass
+
+
+class Subject:
+    def __init__(self):
+        self.observers = []
+
+    def notify(self):
+        for item in self.observers:
+            item.update(self)
+
+
+class SMSNotifier(Observer):
+    def update(self, subject):
+        print(f"SMS-> {subject.students[-1].name} was joined")
+
+
+class EmailNotifier(Observer):
+    def update(self, subject):
+        print(f"EMAIL-> {subject.students[-1].name} was joined")
+
+
+class BaseSerializer:
+    def __init__(self, obj):
+        self.obj = obj
+
+    def save(self):
+        return encode(self.obj)
+
+    @staticmethod
+    def load(data):
+        return decode(data)
+
+
+class ConsoleWriter:
+    @staticmethod
+    def write(text):
+        print(text)
+
+
+class FileWriter:
+    def __init__(self):
+        self.file_name = "log"
+
+    def write(self, text):
+        with open(self.file_name, "a", encoding="utf-8") as f:
+            f.write(f"{text}\n")

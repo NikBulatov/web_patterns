@@ -1,24 +1,53 @@
-from nick_framework.templator import render
-from patterns.engine import Engine
-from patterns.router import Route
+from datetime import date
+
+from nick_framework.templator import render, CreateView, ListView
+from patterns.engine import (
+    Engine,
+    Logger,
+    Route,
+    EmailNotifier,
+    SMSNotifier,
+    Debug,
+    BaseSerializer,
+)
 
 engine = Engine()
-urls = {}
+logger = Logger("app")
+email_notifier = EmailNotifier()
+sms_notifier = SMSNotifier()
+routes = {}
 
 
-@Route(urls, "/")
+@Route(routes, "/")
 class IndexView:
     def __call__(self, request: dict) -> tuple[str, str]:
-        return "200 OK", render("index.html.jinja")
+        return "200 OK", render("index.html.jinja", objects_list=engine.categories)
 
 
-@Route(urls, "/courses/list/")
+@Route(routes, "/study_programs/")
+class StudyPrograms:
+    @Debug(name="StudyPrograms")
+    def __call__(self, request):
+        return "200 OK", render("study-programs.html", date=date.today())
+
+
+@Route(routes, "/course/list/")
 class CoursesListView:
     def __call__(self, request: dict) -> tuple[str, str]:
-        return "200 OK", render("course/list.html.jinja")
+        logger.log("Course list")
+        try:
+            category = engine.find_category_by_id(int(request["request_params"]["id"]))
+            return "200 OK", render(
+                "course_list.html",
+                objects_list=category.courses,
+                name=category.name,
+                id=category.id,
+            )
+        except KeyError:
+            return "200 OK", "No courses have been added yet"
 
 
-@Route(urls, "/courses/create/")
+@Route(routes, "/course/create/")
 class CreateCourseView:
     category_id = -1
 
@@ -32,8 +61,7 @@ class CreateCourseView:
 
             if self.category_id != -1:
                 category = engine.find_category_by_id(int(self.category_id))
-                models = [engine.create_model(f"Something #{i}") for i in range(4)]
-                course = engine.create_course("record", name, category, models)
+                course = engine.create_course("record", name, category)
                 engine.courses.append(course)
 
             return "200 OK", render(
@@ -55,19 +83,20 @@ class CreateCourseView:
                 return "200 OK", "No categories have been added yet"
 
 
-@Route(urls, "/about/")
+@Route(routes, "/about/")
 class AboutView:
+    @Debug(name="About")
     def __call__(self, request: dict) -> tuple[str, str]:
         return "200 OK", render("about.html.jinja")
 
 
-@Route(urls, "/category/list/")
+@Route(routes, "/category/list/")
 class CategoryListView:
     def __call__(self, request: dict) -> tuple[str, str]:
         return "200 OK", render("category/list.html.jinja")
 
 
-@Route(urls, "/category/create/")
+@Route(routes, "/category/create/")
 class CreateCategoryView:
     def __call__(self, request):
         if request["method"] == "POST":
@@ -85,15 +114,13 @@ class CreateCategoryView:
             new_category = engine.create_category(name, category)
             engine.categories.append(new_category)
 
-            return "200 OK", render(
-                "category/create.html.jinja", objects_list=engine.categories
-            )
+            return "200 OK", render("index.html.jinja", objects_list=engine.categories)
         else:
             categories = engine.categories
             return "200 OK", render("category/create.html.jinja", categories=categories)
 
 
-@Route(urls, "/courses/copy/")
+@Route(routes, "/course/copy/")
 class CopyCourseView:
     def __call__(self, request):
         request_params = request["request_params"]
@@ -114,6 +141,50 @@ class CopyCourseView:
             )
         except KeyError:
             return "200 OK", "No courses have been added yet"
+
+
+@Route(routes, "/student/list")
+class StudentListView(ListView):
+    queryset = engine.students
+    template_name = "student_list.html"
+
+
+@Route(routes, "/student/create")
+class StudentCreateView(CreateView):
+    template_name = "create_student.html"
+
+    def create_obj(self, data: dict):
+        name = data["name"]
+        name = engine.decode_value(name)
+        new_obj = engine.create_user("student", name)
+        engine.students.append(new_obj)
+
+
+@Route(routes, "/student/add")
+class AddStudentByCourseCreateView(CreateView):
+    template_name = "add_student.html"
+
+    def get_context_data(self):
+        context = super().get_context_data()
+        context["courses"] = engine.courses
+        context["students"] = engine.students
+        return context
+
+    def create_obj(self, data: dict):
+        course_name = data["course_name"]
+        course_name = engine.decode_value(course_name)
+        course = engine.get_course(course_name)
+        student_name = data["student_name"]
+        student_name = engine.decode_value(student_name)
+        student = engine.get_student(student_name)
+        course.add_student(student)
+
+
+@Route(routes, "/api/")
+class CourseAPI:
+    @Debug(name="CourseAPI")
+    def __call__(self, request):
+        return "200 OK", BaseSerializer(engine.courses).save()
 
 
 class NotFoundView:

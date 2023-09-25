@@ -1,7 +1,10 @@
+from copy import deepcopy
+from engine import  Subject
+
+
 class User:
-    def __init__(self):
-        self.email = None
-        self.password = None
+    def __init__(self, name):
+        self.name = name
 
 
 class Teacher(User):
@@ -9,18 +12,37 @@ class Teacher(User):
 
 
 class Student(User):
-    pass
-
-
-class Staff(User):
-    def __init__(self):
-        self.permission = None
-        super().__init__()
+    def __init__(self, name):
+        self.courses = []
+        super().__init__(name)
 
 
 class UserFactory:
-    types = {"student": Student, "teacher": Teacher, "staff": Staff}
+    types = {"student": Student, "teacher": Teacher}
 
     @classmethod
-    def create(cls, type_: str):
-        return cls.types[type_]()
+    def create(cls, type_, name):
+        return cls.types[type_](name)
+
+
+
+
+
+class Category:
+    auto_id = 0
+
+    def __init__(self, name, category):
+        self.id = Category.auto_id
+        Category.auto_id += 1
+        self.name = name
+        self.category = category
+        self.courses = []
+
+    def course_count(self):
+        result = len(self.courses)
+        if self.category:
+            result += self.category.course_count()
+        return result
+
+
+

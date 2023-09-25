@@ -1,7 +1,7 @@
-# Origami courses
 from copy import deepcopy
-from patterns.categories import Category
-from patterns.models import Model
+
+from patterns.engine import Subject
+from patterns.users import Student
 
 
 class CoursePrototype:
@@ -9,25 +9,34 @@ class CoursePrototype:
         return deepcopy(self)
 
 
-class Course(CoursePrototype):
-    def __init__(self, name: str, category: Category, models: list[Model]):
+class Course(CoursePrototype, Subject):
+    def __init__(self, name, category):
         self.name = name
         self.category = category
-        self.models = models
         self.category.courses.append(self)
+        self.students = []
+        super().__init__()
+
+    def __getitem__(self, item):
+        return self.students[item]
+
+    def add_student(self, student: Student):
+        self.students.append(student)
+        student.courses.append(self)
+        self.notify()
 
 
 class InteractiveCourse(Course):
     pass
 
 
-class RecordedCourse(Course):
+class RecordCourse(Course):
     pass
 
 
 class CourseFactory:
-    types = {"interactive": InteractiveCourse, "record": RecordedCourse}
+    types = {"interactive": InteractiveCourse, "record": RecordCourse}
 
     @classmethod
-    def create(cls, type_: str, name: str, category: Category, models: list[Model]):
-        return cls.types[type_](name, category, models)
+    def create(cls, type_, name, category):
+        return cls.types[type_](name, category)
