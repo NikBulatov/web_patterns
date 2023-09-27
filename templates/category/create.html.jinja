@@ -1,0 +1,28 @@
+{% extends 'templates/base.html.jinja' %}
+{% block title %}Create Category{% endblock title %}
+<body>
+{% block body %}
+    {% block header %}
+        {{ super() }}
+    {% endblock header %}
+    {% block sidebar %}
+        {{ super() }}
+        {% block news %}
+        {% endblock news %}
+    {% endblock sidebar %}
+    {% block content %}
+        <div id="content">
+            <h1>Create category</h1>
+            <form method="post">
+                <label>
+                    <input type="text" name="name" placeholder="Title">
+                </label>
+                <button type="submit">Save and return back to home</button>
+            </form>
+        </div>
+    {% endblock content %}
+    {% block footer %}
+        {{ super() }}
+    {% endblock footer %}
+{% endblock body %}
+</body>

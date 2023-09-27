@@ -1,0 +1,20 @@
+{% extends "templates/base.html.jinja" %}
+{% block title %}
+    Create student
+{% endblock %}
+{% block body %}
+    <div>
+        <li>
+            <a href="/student/list/">Student list</a>
+        </li>
+    </div>
+    <div>
+        <h1>Create student</h1>
+        <form method="post">
+            <label>
+                <input type="text" name="name" placeholder="Name">
+            </label>
+            <button type="submit">Save</button>
+        </form>
+    </div>
+{% endblock %}

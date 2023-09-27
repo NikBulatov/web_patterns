@@ -1,0 +1,26 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    {% block head %}
+        <title>{% block title %}{% endblock title %}</title>
+        <meta charset="utf-8">
+        <meta name="description" content="website description"/>
+        <meta name="keywords" content="website keywords, website keywords"/>
+        <meta http-equiv="content-type"
+              content="text/html; charset=windows-1252"/>
+        {% block style %}
+            <link rel="stylesheet" type="text/css" href="style/style.css"/>
+        {% endblock style %}
+    {% endblock head %}
+</head>
+<body>
+{% block body %}
+    {% block sidebar %}
+        {% block news %}
+        {% endblock news %}
+    {% endblock sidebar %}
+    {% block content %}
+    {% endblock content %}
+{% endblock body %}
+</body>
+</html>

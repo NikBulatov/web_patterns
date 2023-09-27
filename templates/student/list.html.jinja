@@ -1,0 +1,25 @@
+{% extends "templates/base.html.jinja" %}
+{% block title %}
+    Students
+{% endblock %}
+{% block body %}
+    <div>
+        <li>
+            <a href="/student/create">Create student</a>
+        </li>
+        <li>
+            <a href="/student/add">Add student to course</a>
+        </li>
+    </div>
+    <h1>Course list</h1>
+    <div>
+        {% for item in objects_list %}
+            <li>
+                {{ item.name }}
+                {% for course in item.courses %}
+                    {{ course.name }}
+                {% endfor %}
+            </li>
+        {% endfor %}
+    </div>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "base.html.jinja" %}
+{% block title %}
+    Programming training
+{% endblock %}
+{% block body %}
+    <div class="content">
+        <h1>Study Programs</h1>
+        <p>The schedule is valid for {{ date }}</p>
+        <table>
+            <tr class="head">
+                <th></th>
+                <th>Moscow</th>
+                <th>Saint-Petersburg</th>
+                <th>Nizhny Novgorod</th>
+            </tr>
+            <tr>
+                <th>Programming perspective</th>
+                <td>Sat, 20 February 2021<br/>11:00 - 14:00</td>
+                <td>Sat, 6 March 2021<br/>11:00 - 14:00</td>
+                <td>Sat, 20 March 2021<br/>11:00 - 14:00</td>
+            </tr>
+            <tr class="even">
+                <th>Programing ...</th>
+                <td>Sat, 10 April 2021<br/>11:00 - 13:00</td>
+                <td>Sat, 1 May 2021<br/>11:00 - 13:00</td>
+                <td>Sat, 8 May 2021<br/>11:00 - 13:00</td>
+            </tr>
+            <tr>
+                <th>Application for ...</th>
+                <td>Sat, 26 June 2021<br/>11:00 - 14:00</td>
+                <td>Sat, 3 July 2021<br/>11:00 - 14:00</td>
+                <td>Sat, 10 July 2021<br/>11:00 - 14:00</td>
+            </tr>
+            <tr class="even">
+                <th>WEB for everyone</th>
+                <td>Sat, 28 August 2021<br/>11:00 - 16:00</td>
+                <td>Sat, 4 September 2021<br/>11:00 - 16:00</td>
+                <td>Sat, 11 September 2021<br/>11:00 - 16:00</td>
+            </tr>
+        </table>
+        <form action="" method="post">
+            <fieldset>
+                <legend>Registration</legend>
+                <p><label class="title" for="name">Your Name:</label>
+                    <input type="text" name="name" id="name"><br/>
+                    <label class="title" for="email">Your email:</label>
+                    <input type="text" name="email" id="email"></p>
+                <p><label for="location" class="title">The nearest center:</label>
+                    <select name="location" id="location">
+                        <option value="msk">Moscow</option>
+                        <option value="spb">Saint-Petersburg</option>
+                        <option value="nn">Nizhny Novgorod</option>
+                    </select></p>
+                <span class="title">Already joined?</span>
+                <label><input type="radio" name="member" value="yes"/> Yes</label>
+                <label><input type="radio" name="member" value="no"/> No</label>
+            </fieldset>
+            <div class="submit"><input type="submit" value="Registration"/></div>
+        </form>
+    </div>
+
+{% endblock %}
