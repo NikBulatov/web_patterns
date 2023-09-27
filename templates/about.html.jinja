@@ -2,9 +2,7 @@
 {% block title %}Another Page{% endblock title %}
 <body>
 {% block body %}
-    {% block header %}
-        {{ super() }}
-    {% endblock header %}
+{% include 'includes/header.html.jinja' %}
     {% block sidebar %}
         {{ super() }}
         {% block news %}
@@ -37,8 +35,6 @@
             </ul>
         </div>
     {% endblock content %}
-    {% block footer %}
-        {{ super() }}
-    {% endblock footer %}
+{% include 'includes/footer.html.jinja' %}
 {% endblock body %}
 </body>

@@ -51,28 +51,7 @@ class Engine:
         return val_decode_str.decode("UTF-8")
 
 
-class Observer:
-    def update(self, subject):
-        pass
 
-
-class Subject:
-    def __init__(self):
-        self.observers = []
-
-    def notify(self):
-        for item in self.observers:
-            item.update(self)
-
-
-class SMSNotifier(Observer):
-    def update(self, subject):
-        print(f"SMS-> {subject.students[-1].name} was joined")
-
-
-class EmailNotifier(Observer):
-    def update(self, subject):
-        print(f"EMAIL-> {subject.students[-1].name} was joined")
 
 
 class BaseSerializer:

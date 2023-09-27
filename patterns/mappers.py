@@ -1,6 +1,6 @@
 from sqlite3 import connect, Connection, Cursor
-from users import Student, Category, User
-from exceptions import *
+from patterns.users import Student, Category, User
+from patterns.exceptions import *
 
 connection = connect("db.sqlite")
 

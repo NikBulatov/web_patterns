@@ -3,13 +3,8 @@ from datetime import date
 from nick_framework.templator import render, CreateView, ListView
 from patterns.utils import Logger, Route, Debug
 from patterns.mappers import MapperRegistry
-from patterns.engine import (
-    Engine,
-    EmailNotifier,
-    SMSNotifier,
-    BaseSerializer,
-    UnitOfWork,
-)
+from patterns.engine import Engine,BaseSerializer, UnitOfWork
+from patterns.courses import EmailNotifier, SMSNotifier
 
 engine = Engine()
 logger = Logger("app")
