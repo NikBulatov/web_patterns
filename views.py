@@ -1,14 +1,14 @@
 from datetime import date
 
 from nick_framework.templator import render, CreateView, ListView
+from patterns.utils import Logger, Route, Debug
+from patterns.mappers import MapperRegistry
 from patterns.engine import (
     Engine,
-    Logger,
-    Route,
     EmailNotifier,
     SMSNotifier,
-    Debug,
     BaseSerializer,
+    UnitOfWork,
 )
 
 engine = Engine()
@@ -16,6 +16,8 @@ logger = Logger("app")
 email_notifier = EmailNotifier()
 sms_notifier = SMSNotifier()
 routes = {}
+UnitOfWork.new_current()
+UnitOfWork.get_current().set_mapper_registry(MapperRegistry)
 
 
 @Route(routes, "/")
@@ -28,7 +30,7 @@ class IndexView:
 class StudyPrograms:
     @Debug(name="StudyPrograms")
     def __call__(self, request):
-        return "200 OK", render("study-programs.html", date=date.today())
+        return "200 OK", render("study-programs.html.jinja", date=date.today())
 
 
 @Route(routes, "/course/list/")

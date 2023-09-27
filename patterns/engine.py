@@ -1,5 +1,5 @@
+from threading import local
 from quopri import decodestring
-from time import time
 from jsonpickle import encode, decode
 
 from patterns.users import UserFactory, Student, User, Teacher
@@ -22,12 +22,12 @@ class Engine:
     def create_category(name, category=None) -> Category:
         return Category(name, category)
 
-    def find_category_by_id(self, id: int) -> Category:
+    def find_category_by_id(self, id_: int) -> Category:
         for item in self.categories:
             print("item", item.id)
-            if item.id == id:
+            if item.id == id_:
                 return item
-        raise Exception(f"No category with id = {id}")
+        raise Exception(f"No category with id = {id_}")
 
     @staticmethod
     def create_course(type_, name, category) -> Course:
@@ -49,62 +49,6 @@ class Engine:
         val_b = bytes(value.replace("%", "=").replace("+", " "), "UTF-8")
         val_decode_str = decodestring(val_b)
         return val_decode_str.decode("UTF-8")
-
-
-class SingletonLogger(type):
-    def __init__(cls, name, bases, attrs, **kwargs):
-        super().__init__(name, bases, attrs)
-        cls.__instance = {}
-
-    def __call__(cls, *args, **kwargs):
-        if args:
-            name = args[0]
-        if kwargs:
-            name = kwargs["name"]
-
-        if name in cls.__instance:
-            return cls.__instance[name]
-        else:
-            cls.__instance[name] = super().__call__(*args, **kwargs)
-            return cls.__instance[name]
-
-
-class Logger(metaclass=SingletonLogger):
-    def __init__(self, name: str):
-        self.name = name
-
-    @staticmethod
-    def log(text: str) -> None:
-        print("LOG --->", text)
-
-
-class Debug:
-    def __init__(self, name):
-        self.name = name
-
-    def __call__(self, cls):
-        def timeit(method):
-            def timed(*args, **kw):
-                ts = time()
-                result = method(*args, **kw)
-                te = time()
-                delta = te - ts
-
-                print(f"debug --> {self.name} executed {delta:2.2f} ms")
-                return result
-
-            return timed
-
-        return timeit(cls)
-
-
-class Route:
-    def __init__(self, routes, path):
-        self.routes = routes
-        self.url = path
-
-    def __call__(self, view):
-        self.routes[self.url] = view()
 
 
 class Observer:
@@ -156,3 +100,70 @@ class FileWriter:
     def write(self, text):
         with open(self.file_name, "a", encoding="utf-8") as f:
             f.write(f"{text}\n")
+
+
+class UnitOfWork:
+    current = local()
+
+    def __init__(self):
+        self.new_objects = []
+        self.dirty_objects = []
+        self.removed_objects = []
+
+    def set_mapper_registry(self, mapper_registry):
+        self.mapper_registry = mapper_registry
+
+    def register_new(self, obj):
+        self.new_objects.append(obj)
+
+    def register_dirty(self, obj):
+        self.dirty_objects.append(obj)
+
+    def register_removed(self, obj):
+        self.removed_objects.append(obj)
+
+    def commit(self):
+        self.insert_new()
+        self.update_dirty()
+        self.delete_removed()
+
+        self.new_objects.clear()
+        self.dirty_objects.clear()
+        self.removed_objects.clear()
+
+    def insert_new(self):
+        print(self.new_objects)
+        for obj in self.new_objects:
+            print(f"Output {self.mapper_registry}")
+            self.mapper_registry.get_mapper(obj).insert(obj)
+
+    def update_dirty(self):
+        for obj in self.dirty_objects:
+            self.mapper_registry.get_mapper(obj).update(obj)
+
+    def delete_removed(self):
+        for obj in self.removed_objects:
+            self.mapper_registry.get_mapper(obj).delete(obj)
+
+    @classmethod
+    def set_current(cls, unit_of_work):
+        cls.current.unit_of_work = unit_of_work
+
+    @staticmethod
+    def new_current():
+        __class__.set_current(UnitOfWork())
+
+    @classmethod
+    def get_current(cls):
+        return cls.current.unit_of_work
+
+
+class DomainObject:
+    def mark_new(self):
+        UnitOfWork.get_current().register_new(self)
+
+    def mark_dirty(self):
+        UnitOfWork.get_current().register_dirty(self)
+
+    def mark_removed(self):
+        UnitOfWork.get_current().register_removed(self)

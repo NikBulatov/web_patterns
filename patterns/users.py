@@ -1,7 +1,3 @@
-from copy import deepcopy
-from engine import  Subject
-
-
 class User:
     def __init__(self, name):
         self.name = name
@@ -25,9 +21,6 @@ class UserFactory:
         return cls.types[type_](name)
 
 
-
-
-
 class Category:
     auto_id = 0
 
@@ -43,6 +36,3 @@ class Category:
         if self.category:
             result += self.category.course_count()
         return result
-
-
-
