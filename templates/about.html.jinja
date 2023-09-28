@@ -1,15 +1,9 @@
 {% extends 'base.html.jinja' %}
-{% block title %}Another Page{% endblock title %}
+{% block title %}About Us{% endblock title %}
 <body>
 {% block body %}
-{% include 'includes/header.html.jinja' %}
-    {% block sidebar %}
-        {{ super() }}
-        {% block news %}
-        {% endblock news %}
-    {% endblock sidebar %}
+    {% include 'includes/header.html.jinja' %}
     {% block content %}
-        <div id="content">
             <h1>Another Page</h1>
             <ul>
                 {% for _ in range(4) %}
@@ -33,8 +27,7 @@
                     </li>
                 {% endfor %}
             </ul>
-        </div>
+            {% include 'includes/footer.html.jinja' %}
     {% endblock content %}
-{% include 'includes/footer.html.jinja' %}
 {% endblock body %}
 </body>
